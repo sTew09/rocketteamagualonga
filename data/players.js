@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:57:21
+ * Última atualização: 26/06/2026, 21:57:54
  */
 
 const PLAYERS_DATA = [
@@ -30,10 +30,10 @@ const PLAYERS_DATA = [
     },
     {
         "id": "p3",
-        "name": "Paulo",
-        "tag": "Paulo",
-        "platform": "PC",
-        "rlId": "",
+        "name": "João Ferreira",
+        "tag": "JoaoF99",
+        "platform": "Xbox",
+        "rlId": "JoaoF99#9012",
         "joinDate": "2024-02-01",
         "role": "player",
         "color": "#22c55e"
