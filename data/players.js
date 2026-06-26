@@ -4,16 +4,16 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:51:16
+ * Última atualização: 26/06/2026, 21:54:01
  */
 
 const PLAYERS_DATA = [
     {
         "id": "p1",
-        "name": "Carlos Mendes",
-        "tag": "CarlosRL",
+        "name": "stew",
+        "tag": "stew",
         "platform": "PC",
-        "rlId": "CarlosRL#1234",
+        "rlId": "",
         "joinDate": "2024-01-15",
         "role": "captain",
         "color": "#f97316"
