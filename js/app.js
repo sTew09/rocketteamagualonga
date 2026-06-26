@@ -349,14 +349,65 @@ const App = {
      */
 
     /**
+     * Gera os campos de estatísticas para os jogadores selecionados
+     */
+    updatePlayerStatsFields() {
+        const checked = Array.from(
+            document.querySelectorAll('input[name="match-players"]:checked')
+        ).map(cb => cb.value);
+
+        const container = document.getElementById('match-player-stats-container');
+        const fieldsDiv = document.getElementById('match-player-stats-fields');
+
+        if (checked.length === 0) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+
+        // Obter stats existentes (se a editar)
+        const editId = document.getElementById('match-edit-id').value;
+        const existingMatch = editId ? MATCHES_DATA.find(m => m.id === editId) : null;
+
+        fieldsDiv.innerHTML = checked.map(pid => {
+            const player = PLAYERS_DATA.find(p => p.id === pid);
+            const existing = existingMatch?.playerStats?.[pid] || { goals: 0, assists: 0, saves: 0, shots: 0 };
+            return `
+                <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem; margin-bottom: 0.5rem;">
+                    <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--primary);">
+                        <i class="fas fa-user" style="font-size: 0.75rem;"></i> ${player ? player.name : pid}
+                    </div>
+                    <div class="form-row" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Golos</label>
+                            <input type="number" name="stat_goals_${pid}" min="0" value="${existing.goals}" style="width: 100%; padding: 0.4rem; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Assists</label>
+                            <input type="number" name="stat_assists_${pid}" min="0" value="${existing.assists}" style="width: 100%; padding: 0.4rem; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Defesas</label>
+                            <input type="number" name="stat_saves_${pid}" min="0" value="${existing.saves}" style="width: 100%; padding: 0.4rem; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Remates</label>
+                            <input type="number" name="stat_shots_${pid}" min="0" value="${existing.shots}" style="width: 100%; padding: 0.4rem; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    /**
      * Abre o modal para adicionar/editar partida
-     * @param {string} matchId - ID da partida (null para adicionar nova)
      */
     openMatchModal(matchId = null) {
         const form = document.getElementById('match-form');
         const title = document.getElementById('match-modal-title');
 
-        // Reset form
         form.reset();
         document.getElementById('match-edit-id').value = '';
 
@@ -364,7 +415,7 @@ const App = {
         const checkboxesContainer = document.getElementById('match-players-checkboxes');
         checkboxesContainer.innerHTML = PLAYERS_DATA.map(player => `
             <label class="checkbox-item">
-                <input type="checkbox" name="match-players" value="${player.id}">
+                <input type="checkbox" name="match-players" value="${player.id}" onchange="App.updatePlayerStatsFields()">
                 ${player.name}
             </label>
         `).join('');
@@ -374,7 +425,10 @@ const App = {
         mvpSelect.innerHTML = '<option value="">Nenhum</option>' + 
             PLAYERS_DATA.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
-        // Se editar, preencher dados
+        // Esconder stats por defeito
+        document.getElementById('match-player-stats-container').classList.add('hidden');
+        document.getElementById('match-player-stats-fields').innerHTML = '';
+
         if (matchId) {
             title.textContent = 'Editar Partida';
             const match = MATCHES_DATA.find(m => m.id === matchId);
@@ -394,14 +448,13 @@ const App = {
                     if (cb) cb.checked = true;
                 });
 
-                // Selecionar MVP
-                if (match.mvp) {
-                    mvpSelect.value = match.mvp;
-                }
+                if (match.mvp) mvpSelect.value = match.mvp;
+
+                // Gerar campos de stats para jogadores marcados
+                this.updatePlayerStatsFields();
             }
         } else {
             title.textContent = 'Adicionar Partida';
-            // Data de hoje por defeito
             document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
         }
 
@@ -439,18 +492,19 @@ const App = {
             playerStats: {}
         };
 
-        // Criar estatísticas base para cada jogador participante
+        // Recolher estatísticas individuais dos campos de input
         selectedPlayers.forEach(pid => {
-            // Se editar, manter stats existentes
-            if (editId) {
-                const existingMatch = MATCHES_DATA.find(m => m.id === editId);
-                if (existingMatch && existingMatch.playerStats[pid]) {
-                    matchData.playerStats[pid] = existingMatch.playerStats[pid];
-                    return;
-                }
-            }
-            // Stats base zeradas
-            matchData.playerStats[pid] = { goals: 0, assists: 0, saves: 0, shots: 0 };
+            const goalsInput = document.querySelector(`[name="stat_goals_${pid}"]`);
+            const assistsInput = document.querySelector(`[name="stat_assists_${pid}"]`);
+            const savesInput = document.querySelector(`[name="stat_saves_${pid}"]`);
+            const shotsInput = document.querySelector(`[name="stat_shots_${pid}"]`);
+
+            matchData.playerStats[pid] = {
+                goals: goalsInput ? parseInt(goalsInput.value) || 0 : 0,
+                assists: assistsInput ? parseInt(assistsInput.value) || 0 : 0,
+                saves: savesInput ? parseInt(savesInput.value) || 0 : 0,
+                shots: shotsInput ? parseInt(shotsInput.value) || 0 : 0
+            };
         });
 
         if (editId) {
