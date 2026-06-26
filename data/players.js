@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:42:39
+ * Última atualização: 26/06/2026, 21:45:55
  */
 
 const PLAYERS_DATA = [
@@ -47,15 +47,5 @@ const PLAYERS_DATA = [
         "joinDate": "2024-03-10",
         "role": "sub",
         "color": "#a855f7"
-    },
-    {
-        "id": "p5",
-        "name": "Ricardo Silva",
-        "tag": "RickySR",
-        "platform": "PC",
-        "rlId": "RickySR#7890",
-        "joinDate": "2024-04-20",
-        "role": "player",
-        "color": "#ef4444"
     }
 ];
