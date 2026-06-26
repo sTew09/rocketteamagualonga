@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 22:42:21
+ * Última atualização: 26/06/2026, 22:44:10
  */
 
 const PLAYERS_DATA = [
@@ -37,5 +37,15 @@ const PLAYERS_DATA = [
         "joinDate": "2024-02-01",
         "role": "player",
         "color": "#22c55e"
+    },
+    {
+        "id": "id_1782510249718_2khhauvpf",
+        "name": "afonso",
+        "tag": "afonso",
+        "platform": "PC",
+        "rlId": "",
+        "joinDate": "2026-06-26",
+        "role": "player",
+        "color": "#3b82f6"
     }
 ];
