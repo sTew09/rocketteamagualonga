@@ -59,38 +59,56 @@ const GitHub = {
     },
 
     /**
-     * Escreve/atualiza um ficheiro no repositório
+     * Escreve/atualiza um ficheiro no repositório com retry automático
      */
     async writeFile(path, content, message, sha = null) {
         const config = this.getConfig();
         const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}`;
 
-        const body = {
-            message: message,
-            content: btoa(unescape(encodeURIComponent(content))),
-            branch: config.branch
-        };
+        // Retry até 3 vezes em caso de conflito de SHA
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            // Reler SHA antes de cada tentativa (exceto na primeira se já temos)
+            if (attempt > 1 || !sha) {
+                try {
+                    const f = await this.getFile(path);
+                    sha = f.sha;
+                } catch { /* ficheiro pode não existir */ }
+            }
 
-        if (sha) {
-            body.sha = sha;
-        }
+            const body = {
+                message: message,
+                content: btoa(unescape(encodeURIComponent(content))),
+                branch: config.branch
+            };
 
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${config.token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify(body)
-        });
+            if (sha) {
+                body.sha = sha;
+            }
 
-        if (!response.ok) {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${config.token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                return await response.json();
+            }
+
             const error = await response.json().catch(() => ({}));
+
+            // Se é conflito de SHA, retry
+            if (response.status === 422 && attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                continue;
+            }
+
             throw new Error(`Erro ao guardar ${path}: ${error.message || response.statusText}`);
         }
-
-        return await response.json();
     },
 
     /**
