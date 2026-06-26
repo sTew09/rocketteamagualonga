@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:57:54
+ * Última atualização: 26/06/2026, 21:59:55
  */
 
 const PLAYERS_DATA = [
@@ -20,10 +20,10 @@ const PLAYERS_DATA = [
     },
     {
         "id": "p2",
-        "name": "Miguel Santos",
-        "tag": "Miguinho",
-        "platform": "PS",
-        "rlId": "Miguinho#5678",
+        "name": "Leandro",
+        "tag": "Leandro",
+        "platform": "PC",
+        "rlId": "",
         "joinDate": "2024-01-15",
         "role": "player",
         "color": "#3b82f6"
