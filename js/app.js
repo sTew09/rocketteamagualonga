@@ -469,14 +469,8 @@ const App = {
         this.closeModal('match-modal');
         this.navigate('matches');
 
-        // Lembrar de guardar no GitHub
-        setTimeout(() => {
-            Utils.showToast(
-                '💡 Lembre-se: use o botão ☁️ no topo para descarregar os ficheiros e atualizar no GitHub.',
-                'info',
-                5000
-            );
-        }, 1000);
+        // Auto-save no GitHub se configurado
+        App.autoSave('Partida guardada');
     },
 
     /**
@@ -491,6 +485,7 @@ const App = {
             MATCHES_DATA.splice(index, 1);
             Utils.showToast('Partida removida com sucesso!', 'success');
             this.navigate('matches');
+            App.autoSave('Partida removida');
         }
     },
 
@@ -568,14 +563,8 @@ const App = {
             this.navigate('players');
         }
 
-        // Lembrar de guardar no GitHub
-        setTimeout(() => {
-            Utils.showToast(
-                '💡 Lembre-se: use o botão ☁️ no topo para descarregar os ficheiros e atualizar no GitHub.',
-                'info',
-                5000
-            );
-        }, 1000);
+        // Auto-save no GitHub se configurado
+        App.autoSave('Jogador guardado');
     },
 
     /**
@@ -593,6 +582,7 @@ const App = {
             PLAYERS_DATA.splice(index, 1);
             Utils.showToast('Jogador removido com sucesso!', 'success');
             this.navigate('players');
+            App.autoSave('Jogador removido');
         }
     },
 
@@ -641,6 +631,32 @@ const App = {
             'success',
             5000
         );
+    },
+
+    /**
+     * Auto-save: guarda automaticamente no GitHub se configurado
+     * Senão, descarrega os ficheiros
+     */
+    async autoSave(contextMsg) {
+        if (typeof GitHub !== 'undefined' && GitHub.isConfigured()) {
+            // GitHub configurado — auto-save silencioso
+            setTimeout(async () => {
+                try {
+                    await GitHub.saveData((msg) => {
+                        // silencioso durante auto-save
+                    });
+                    Utils.showToast(`☁️ ${contextMsg} e sincronizado com o GitHub!`, 'success', 4000);
+                } catch (error) {
+                    Utils.showToast(`⚠️ ${contextMsg} mas falhou ao sincronizar: ${error.message}. Use o botão ☁️ para tentar novamente.`, 'error', 6000);
+                }
+            }, 500);
+        } else {
+            // Sem GitHub — descarregar ficheiros
+            setTimeout(() => {
+                App.exportDataAsFile();
+                Utils.showToast(`💾 ${contextMsg}. Ficheiros descarregados — substitua na pasta data/ do GitHub.`, 'info', 6000);
+            }, 500);
+        }
     },
 
     /** Exporta todas as estatísticas para CSV */
