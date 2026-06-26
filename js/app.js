@@ -687,30 +687,38 @@ const App = {
         );
     },
 
+    /** Timeout do auto-save para debounce */
+    _autoSaveTimeout: null,
+
     /**
-     * Auto-save: guarda automaticamente no GitHub se configurado
-     * Senão, descarrega os ficheiros
+     * Auto-save com debounce — evita múltiplos saves rápidos
      */
-    async autoSave(contextMsg) {
-        if (typeof GitHub !== 'undefined' && GitHub.isConfigured()) {
-            // GitHub configurado — auto-save silencioso
-            setTimeout(async () => {
+    autoSave(contextMsg) {
+        // Cancelar save anterior se houver
+        if (this._autoSaveTimeout) {
+            clearTimeout(this._autoSaveTimeout);
+        }
+
+        this._autoSaveTimeout = setTimeout(async () => {
+            this._autoSaveTimeout = null;
+
+            if (typeof GitHub !== 'undefined' && GitHub.isConfigured()) {
+                // Verificar se já está a guardar
+                if (GitHub._saving) {
+                    Utils.showToast(`⏳ ${contextMsg}. Guarda anterior em curso...`, 'info', 3000);
+                    return;
+                }
                 try {
-                    await GitHub.saveData((msg) => {
-                        // silencioso durante auto-save
-                    });
+                    await GitHub.saveData((msg) => {});
                     Utils.showToast(`☁️ ${contextMsg} e sincronizado com o GitHub!`, 'success', 4000);
                 } catch (error) {
-                    Utils.showToast(`⚠️ ${contextMsg} mas falhou ao sincronizar: ${error.message}. Use o botão ☁️ para tentar novamente.`, 'error', 6000);
+                    Utils.showToast(`⚠️ ${contextMsg} mas falhou: ${error.message}. Use o botão ☁️.`, 'error', 6000);
                 }
-            }, 500);
-        } else {
-            // Sem GitHub — descarregar ficheiros
-            setTimeout(() => {
+            } else {
                 App.exportDataAsFile();
-                Utils.showToast(`💾 ${contextMsg}. Ficheiros descarregados — substitua na pasta data/ do GitHub.`, 'info', 6000);
-            }, 500);
-        }
+                Utils.showToast(`💾 ${contextMsg}. Ficheiros descarregados.`, 'info', 5000);
+            }
+        }, 2000);
     },
 
     /** Exporta todas as estatísticas para CSV */
