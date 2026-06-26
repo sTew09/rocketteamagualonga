@@ -140,6 +140,7 @@ const GitHub = {
 
     /**
      * Guarda os dados diretamente no GitHub
+     * Relê o SHA imediatamente antes de cada escrita para evitar conflitos
      */
     async saveData(onProgress = null) {
         const config = this.getConfig();
@@ -153,41 +154,26 @@ const GitHub = {
         if (onProgress) onProgress('A preparar dados das partidas...');
         const matchesCode = this.generateDataFile('MATCHES_DATA', MATCHES_DATA);
 
-        let playersSha = null;
-        let matchesSha = null;
-
-        if (onProgress) onProgress('A ler ficheiros do repositório...');
-        try {
-            const playersFile = await this.getFile('data/players.js');
-            playersSha = playersFile.sha;
-        } catch {
-            // Ficheiro pode não existir ainda
-        }
-
-        try {
-            const matchesFile = await this.getFile('data/matches.js');
-            matchesSha = matchesFile.sha;
-        } catch {
-            // Ficheiro pode não existir ainda
-        }
-
+        // Escrever jogadores — reler SHA imediatamente antes
         if (onProgress) onProgress('A guardar jogadores no GitHub...');
-        await this.writeFile(
-            'data/players.js',
-            playersCode,
-            '🤖 Atualizar dados dos jogadores - TEAM AGUA LONGA',
-            playersSha
-        );
+        let playersSha = null;
+        try {
+            const f = await this.getFile('data/players.js');
+            playersSha = f.sha;
+        } catch { /* ficheiro pode não existir */ }
+        await this.writeFile('data/players.js', playersCode, '🤖 Atualizar jogadores - TEAM AGUA LONGA', playersSha);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Esperar para evitar conflito
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
+        // Escrever partidas — reler SHA imediatamente antes
         if (onProgress) onProgress('A guardar partidas no GitHub...');
-        await this.writeFile(
-            'data/matches.js',
-            matchesCode,
-            '🤖 Atualizar dados das partidas - TEAM AGUA LONGA',
-            matchesSha
-        );
+        let matchesSha = null;
+        try {
+            const f = await this.getFile('data/matches.js');
+            matchesSha = f.sha;
+        } catch { /* ficheiro pode não existir */ }
+        await this.writeFile('data/matches.js', matchesCode, '🤖 Atualizar partidas - TEAM AGUA LONGA', matchesSha);
 
         if (onProgress) onProgress('Concluído!');
         return true;
