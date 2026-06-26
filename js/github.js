@@ -5,11 +5,6 @@
  * 
  * Permite ler e escrever ficheiros diretamente no repositório GitHub
  * através da API REST do GitHub, usando um Personal Access Token (PAT).
- * 
- * O utilizador precisa de:
- * 1. Um GitHub Personal Access Token (com permissão "repo")
- * 2. O nome do repositório (ex: "user/meu-repo")
- * 3. A branch (geralmente "main")
  */
 
 const GitHub = {
@@ -36,8 +31,6 @@ const GitHub = {
 
     /**
      * Lê o conteúdo de um ficheiro do repositório
-     * @param {string} path - Caminho do ficheiro no repositório
-     * @returns {Object} { content, sha }
      */
     async getFile(path) {
         const config = this.getConfig();
@@ -56,7 +49,6 @@ const GitHub = {
         }
 
         const data = await response.json();
-        // Decodificar de base64
         const content = decodeURIComponent(
             atob(data.content.replace(/\n/g, '')).split('').map(c =>
                 '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
@@ -68,10 +60,6 @@ const GitHub = {
 
     /**
      * Escreve/atualiza um ficheiro no repositório
-     * @param {string} path - Caminho do ficheiro
-     * @param {string} content - Conteúdo novo
-     * @param {string} message - Mensagem de commit
-     * @param {string} sha - SHA atual do ficheiro (requerido para atualizar)
      */
     async writeFile(path, content, message, sha = null) {
         const config = this.getConfig();
@@ -79,7 +67,7 @@ const GitHub = {
 
         const body = {
             message: message,
-            content: btoa(unescape(encodeURIComponent(content))), // UTF-8 para base64
+            content: btoa(unescape(encodeURIComponent(content))),
             branch: config.branch
         };
 
@@ -106,43 +94,65 @@ const GitHub = {
     },
 
     /**
-     * Testa a ligação ao GitHub
-     * @returns {boolean} true se a ligação é válida
+     * Testa a ligação ao GitHub e deteta a branch correta
      */
     async testConnection() {
         try {
             const config = this.getConfig();
-            const url = `https://api.github.com/repos/${config.owner}/${config.repo}`;
-            const response = await fetch(url, {
+            
+            // Testar acesso ao repositório
+            const repoUrl = `https://api.github.com/repos/${config.owner}/${config.repo}`;
+            const repoResp = await fetch(repoUrl, {
                 headers: {
                     'Authorization': `token ${config.token}`,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
-            return response.ok;
-        } catch {
-            return false;
+            
+            if (!repoResp.ok) {
+                return { ok: false, message: 'Repositório não encontrado. Verifique owner e nome do repositório.' };
+            }
+
+            const repoData = await repoResp.json();
+            
+            // Verificar se a branch existe
+            const branchUrl = `https://api.github.com/repos/${config.owner}/${config.repo}/branches/${config.branch}`;
+            const branchResp = await fetch(branchUrl, {
+                headers: {
+                    'Authorization': `token ${config.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (!branchResp.ok) {
+                // Ajustar para a branch padrão
+                const defaultBranch = repoData.default_branch || 'main';
+                config.branch = defaultBranch;
+                this.saveConfig(config);
+                return { ok: true, message: `Branch "${config.branch}" não encontrada. Ajustada para a branch padrão: "${defaultBranch}".` };
+            }
+
+            return { ok: true, message: `Repositório e branch "${config.branch}" encontrados!` };
+        } catch (e) {
+            return { ok: false, message: e.message };
         }
     },
 
     /**
-     * Guarda os dados (jogadores + partidas) diretamente no GitHub
-     * @param {Function} onProgress - Callback de progresso
+     * Guarda os dados diretamente no GitHub
      */
     async saveData(onProgress = null) {
         const config = this.getConfig();
         if (!config) {
-            throw new Error('GitHub não está configurado');
+            throw new Error('GitHub não está configurado. Clique em ⚙️ para configurar.');
         }
 
-        // 1. Gerar código JavaScript dos dados
         if (onProgress) onProgress('A preparar dados dos jogadores...');
         const playersCode = this.generateDataFile('PLAYERS_DATA', PLAYERS_DATA);
         
         if (onProgress) onProgress('A preparar dados das partidas...');
         const matchesCode = this.generateDataFile('MATCHES_DATA', MATCHES_DATA);
 
-        // 2. Ler SHAs atuais dos ficheiros (se existirem)
         let playersSha = null;
         let matchesSha = null;
 
@@ -151,17 +161,16 @@ const GitHub = {
             const playersFile = await this.getFile('data/players.js');
             playersSha = playersFile.sha;
         } catch {
-            // Ficheiro pode não existir, ignorar
+            // Ficheiro pode não existir ainda
         }
 
         try {
             const matchesFile = await this.getFile('data/matches.js');
             matchesSha = matchesFile.sha;
         } catch {
-            // Ficheiro pode não existir, ignorar
+            // Ficheiro pode não existir ainda
         }
 
-        // 3. Escrever jogadores
         if (onProgress) onProgress('A guardar jogadores no GitHub...');
         await this.writeFile(
             'data/players.js',
@@ -170,10 +179,8 @@ const GitHub = {
             playersSha
         );
 
-        // 4. Esperar 1 segundo para evitar conflito de commits
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 5. Escrever partidas
         if (onProgress) onProgress('A guardar partidas no GitHub...');
         await this.writeFile(
             'data/matches.js',
@@ -188,12 +195,9 @@ const GitHub = {
 
     /**
      * Gera o código do ficheiro de dados
-     * @param {string} varName - Nome da variável
-     * @param {Array} data - Dados
-     * @returns {string} Código JavaScript
      */
     generateDataFile(varName, data) {
-        const header = `/**
+        return `/**
  * ============================================
  * TEAM AGUA LONGA - Dados das ${varName === 'PLAYERS_DATA' ? 'Jogadores' : 'Partidas'}
  * ============================================
@@ -203,7 +207,6 @@ const GitHub = {
  */
 
 const ${varName} = ${JSON.stringify(data, null, 4)};`;
-        return header;
     },
 
     /**
@@ -212,7 +215,6 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
     showConfigModal() {
         const config = this.getConfig() || {};
         
-        // Criar modal se não existir
         let modal = document.getElementById('github-modal');
         if (!modal) {
             modal = document.createElement('div');
@@ -230,7 +232,7 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
                     </button>
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">
-                    Configure o GitHub para guardar as alterações diretamente no repositório.<br>
+                    Configure o GitHub para guardar alterações diretamente no repositório.<br>
                     Precisa de um <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--primary);">Personal Access Token</a> com permissão <code>repo</code>.
                 </p>
                 <div class="form-group">
@@ -239,7 +241,7 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fas fa-user"></i> Owner (utilizador/org)</label>
+                        <label><i class="fas fa-user"></i> Owner (utilizador)</label>
                         <input type="text" id="gh-owner" placeholder="ex: ricardo123" value="${config.owner || ''}">
                     </div>
                     <div class="form-group">
@@ -253,7 +255,7 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
                 </div>
                 <div id="gh-test-result" style="margin-bottom: 1rem; font-size: 0.85rem;"></div>
                 <div style="display: flex; gap: 0.75rem;">
-                    <button class="btn btn-ghost" onclick="GitHub.testConnection()" id="gh-test-btn">
+                    <button class="btn btn-ghost" onclick="GitHub.testConnectionUI()" id="gh-test-btn">
                         <i class="fas fa-plug"></i> Testar Ligação
                     </button>
                     <div style="flex: 1;"></div>
@@ -293,12 +295,11 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
         this.closeConfigModal();
     },
 
-    /** Testa a ligação ao GitHub */
-    async testConnection() {
+    /** Testa a ligação (UI) */
+    async testConnectionUI() {
         const btn = document.getElementById('gh-test-btn');
         const result = document.getElementById('gh-test-result');
         
-        // Guardar valores temporariamente
         const token = document.getElementById('gh-token').value.trim();
         const owner = document.getElementById('gh-owner').value.trim();
         const repo = document.getElementById('gh-repo').value.trim();
@@ -309,7 +310,6 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
             return;
         }
 
-        // Guardar temporariamente
         this.saveConfig({ token, owner, repo, branch });
 
         btn.disabled = true;
@@ -317,11 +317,12 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
         result.innerHTML = '';
 
         try {
-            const ok = await this.testConnection();
-            if (ok) {
-                result.innerHTML = '<span style="color: var(--success);">✅ Ligação bem-sucedida! Repositório encontrado.</span>';
+            const testResult = await this.testConnection();
+            if (testResult.ok) {
+                result.innerHTML = `<span style="color: var(--success);">✅ ${testResult.message}</span>`;
+                document.getElementById('gh-branch').value = this.getConfig().branch;
             } else {
-                result.innerHTML = '<span style="color: var(--error);">❌ Ligação falhou. Verifique o token, owner e repositório.</span>';
+                result.innerHTML = `<span style="color: var(--error);">❌ ${testResult.message}</span>`;
             }
         } catch (e) {
             result.innerHTML = `<span style="color: var(--error);">❌ Erro: ${e.message}</span>`;
@@ -340,7 +341,6 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
             return;
         }
 
-        // Criar overlay de progresso
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay active';
         overlay.id = 'gh-progress-modal';
@@ -350,17 +350,17 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
                     <div style="font-size: 3rem; margin-bottom: 1rem;">
                         <i class="fab fa-github" style="color: var(--text-primary);"></i>
                     </div>
-                    <h3 id="gh-progress-title" style="margin-bottom: 1rem;">A guardar no GitHub...</h3>
+                    <h3 style="margin-bottom: 1rem;">A guardar no GitHub...</h3>
                     <p id="gh-progress-msg" style="color: var(--text-secondary); font-size: 0.9rem;">A preparar...</p>
                     <div style="margin-top: 1.5rem;">
                         <div style="height: 4px; background: var(--bg-tertiary); border-radius: 999px; overflow: hidden;">
-                            <div id="gh-progress-bar" style="height: 100%; width: 30%; background: var(--primary); border-radius: 999px; animation: progress 1.5s ease infinite;"></div>
+                            <div style="height: 100%; width: 30%; background: var(--primary); border-radius: 999px; animation: progressAnim 1.5s ease infinite;"></div>
                         </div>
                     </div>
                 </div>
             </div>
             <style>
-                @keyframes progress {
+                @keyframes progressAnim {
                     0% { width: 10%; margin-left: 0; }
                     50% { width: 40%; }
                     100% { width: 10%; margin-left: 90%; }
@@ -379,7 +379,7 @@ const ${varName} = ${JSON.stringify(data, null, 4)};`;
             Utils.showToast('✅ Dados guardados no GitHub com sucesso!', 'success', 5000);
         } catch (error) {
             overlay.remove();
-            Utils.showToast(`❌ Erro ao guardar: ${error.message}`, 'error', 8000);
+            Utils.showToast(`❌ ${error.message}`, 'error', 8000);
             console.error('GitHub save error:', error);
         }
     }
