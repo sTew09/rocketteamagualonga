@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:47:35
+ * Última atualização: 26/06/2026, 21:50:08
  */
 
 const MATCHES_DATA = [
