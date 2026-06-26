@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAM AGUA LONGA - Estatísticas da Equipa</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay active">
+        <div class="modal login-modal">
+            <div class="login-header">
+                <i class="fas fa-rocket login-icon"></i>
+                <h1>TEAM AGUA LONGA</h1>
+                <p>Dashboard de Estatísticas da Equipa</p>
+            </div>
+            <div class="login-options">
+                <button class="login-option" onclick="App.loginAsPlayer()">
+                    <i class="fas fa-user"></i>
+                    <span>Entrar como Jogador</span>
+                    <small>Consulta de estatísticas</small>
+                </button>
+                <button class="login-option admin-option" onclick="App.showAdminLogin()">
+                    <i class="fas fa-crown"></i>
+                    <span>Entrar como Líder</span>
+                    <small>Gestão da equipa</small>
+                </button>
+            </div>
+            <div id="admin-login-form" class="admin-login-form hidden">
+                <div class="form-group">
+                    <label for="admin-user"><i class="fas fa-user"></i> Utilizador</label>
+                    <input type="text" id="admin-user" placeholder="Utilizador" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="admin-pass"><i class="fas fa-lock"></i> Palavra-passe</label>
+                    <input type="password" id="admin-pass" placeholder="Palavra-passe">
+                </div>
+                <div id="login-error" class="login-error hidden">Credenciais inválidas</div>
+                <button class="btn btn-primary btn-full" onclick="App.adminLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <button class="btn btn-ghost btn-full" onclick="App.hideAdminLogin()">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-rocket"></i>
+                <span>TEAM AGUA LONGA</span>
+                <button class="sidebar-toggle" onclick="App.toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-item active" data-page="dashboard">
+                    <a href="#" onclick="App.navigate('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-page="players">
+                    <a href="#" onclick="App.navigate('players')">
+                        <i class="fas fa-users"></i>
+                        <span>Jogadores</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-page="matches">
+                    <a href="#" onclick="App.navigate('matches')">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Partidas</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-page="rankings">
+                    <a href="#" onclick="App.navigate('rankings')">
+                        <i class="fas fa-trophy"></i>
+                        <span>Rankings</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-page="statistics">
+                    <a href="#" onclick="App.navigate('statistics')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Estatísticas</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="current-user">Jogador</span>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="App.logout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-btn" onclick="App.toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="global-search" placeholder="Pesquisar jogadores..." oninput="App.handleSearch(this.value)">
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-icon" onclick="App.toggleTheme()" title="Alternar tema">
+                        <i id="theme-icon" class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn btn-icon" onclick="App.exportAllCSV()" title="Exportar CSV">
+                        <i class="fas fa-file-csv"></i>
+                    </button>
+                    <button class="btn btn-icon" onclick="App.syncToGitHub()" title="Guardar dados (download ou GitHub)" style="color: var(--success);">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div id="page-content" class="page-content">
+                <!-- Content loaded dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Match Modal (Admin) -->
+    <div id="match-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="match-modal-title">Adicionar Partida</h2>
+                <button class="btn btn-icon" onclick="App.closeModal('match-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="match-form" onsubmit="App.saveMatch(event)">
+                <input type="hidden" id="match-edit-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="match-date">Data</label>
+                        <input type="date" id="match-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-season">Época</label>
+                        <input type="text" id="match-season" placeholder="Ex: Season 1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="match-mode">Modo de Jogo</label>
+                        <select id="match-mode">
+                            <option value="3v3">3v3</option>
+                            <option value="2v2">2v2</option>
+                            <option value="1v1">1v1</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-result">Resultado</label>
+                        <select id="match-result">
+                            <option value="win">Vitória</option>
+                            <option value="loss">Derrota</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="match-goals-team">Golos da Equipa</label>
+                        <input type="number" id="match-goals-team" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-goals-against">Golos Adversários</label>
+                        <input type="number" id="match-goals-against" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="match-opponent">Adversário</label>
+                    <input type="text" id="match-opponent" placeholder="Nome da equipa adversária">
+                </div>
+                <div class="form-group">
+                    <label>Participantes</label>
+                    <div id="match-players-checkboxes" class="checkbox-group"></div>
+                </div>
+                <div class="form-group">
+                    <label for="match-mvp">MVP</label>
+                    <select id="match-mvp">
+                        <option value="">Nenhum</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="App.closeModal('match-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Player Modal (Admin) -->
+    <div id="player-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="player-modal-title">Adicionar Jogador</h2>
+                <button class="btn btn-icon" onclick="App.closeModal('player-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="player-form" onsubmit="App.savePlayer(event)">
+                <input type="hidden" id="player-edit-id">
+                <div class="form-group">
+                    <label for="player-name">Nome</label>
+                    <input type="text" id="player-name" placeholder="Nome do jogador" required>
+                </div>
+                <div class="form-group">
+                    <label for="player-tag">Tag / Nickname</label>
+                    <input type="text" id="player-tag" placeholder="Ex: Player1">
+                </div>
+                <div class="form-group">
+                    <label for="player-platform">Plataforma</label>
+                    <select id="player-platform">
+                        <option value="PC">PC</option>
+                        <option value="PS">PlayStation</option>
+                        <option value="Xbox">Xbox</option>
+                        <option value="Switch">Nintendo Switch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="player-rlid">Rocket League ID</label>
+                    <input type="text" id="player-rlid" placeholder="Ex: PlayerName#1234">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="App.closeModal('player-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data/players.js"></script>
+    <script src="data/matches.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/pages.js"></script>
+    <script src="js/github.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
