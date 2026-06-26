@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 21:50:08
+ * Última atualização: 26/06/2026, 21:51:16
  */
 
 const MATCHES_DATA = [
@@ -23,7 +23,7 @@ const MATCHES_DATA = [
             "p3",
             "p4"
         ],
-        "mvp": "p1",
+        "mvp": null,
         "playerStats": {
             "p1": {
                 "goals": 0,
