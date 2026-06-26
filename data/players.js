@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 26/06/2026, 22:01:25
+ * Última atualização: 26/06/2026, 22:02:38
  */
 
 const PLAYERS_DATA = [
@@ -37,15 +37,5 @@ const PLAYERS_DATA = [
         "joinDate": "2024-02-01",
         "role": "player",
         "color": "#22c55e"
-    },
-    {
-        "id": "p4",
-        "name": "Pedro Oliveira",
-        "tag": "PedroOO7",
-        "platform": "PC",
-        "rlId": "PedroOO7#3456",
-        "joinDate": "2024-03-10",
-        "role": "sub",
-        "color": "#a855f7"
     }
 ];
