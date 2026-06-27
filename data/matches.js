@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 16:09:08
+ * Última atualização: 27/06/2026, 16:12:54
  */
 
 const MATCHES_DATA = [
@@ -128,7 +128,7 @@ const MATCHES_DATA = [
         "id": "id_1782566835565_vi99esluq",
         "date": "2026-06-27",
         "season": "PRATIDA",
-        "mode": "3v3",
+        "mode": "2v2",
         "result": "win",
         "goalsTeam": 3,
         "goalsAgainst": 2,
