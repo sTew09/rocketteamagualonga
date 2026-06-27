@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 16:12:54
+ * Última atualização: 27/06/2026, 16:16:14
  */
 
 const MATCHES_DATA = [
@@ -272,6 +272,42 @@ const MATCHES_DATA = [
                 "goals": 1,
                 "assists": 0,
                 "saves": 3,
+                "shots": 1
+            }
+        }
+    },
+    {
+        "id": "id_1782573372848_hzctohzjw",
+        "date": "2026-06-27",
+        "season": "pratida",
+        "mode": "3v3",
+        "result": "loss",
+        "goalsTeam": 0,
+        "goalsAgainst": 3,
+        "opponent": "",
+        "players": [
+            "p1",
+            "p2",
+            "p3"
+        ],
+        "mvp": null,
+        "playerStats": {
+            "p1": {
+                "goals": 0,
+                "assists": 0,
+                "saves": 1,
+                "shots": 1
+            },
+            "p2": {
+                "goals": 0,
+                "assists": 0,
+                "saves": 1,
+                "shots": 1
+            },
+            "p3": {
+                "goals": 0,
+                "assists": 0,
+                "saves": 0,
                 "shots": 1
             }
         }
