@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 16:32:58
+ * Última atualização: 27/06/2026, 16:40:45
  */
 
 const MATCHES_DATA = [
@@ -381,6 +381,42 @@ const MATCHES_DATA = [
                 "assists": 0,
                 "saves": 0,
                 "shots": 1
+            }
+        }
+    },
+    {
+        "id": "id_1782574843714_laon3hb9v",
+        "date": "2026-06-27",
+        "season": "partida",
+        "mode": "3v3",
+        "result": "loss",
+        "goalsTeam": 2,
+        "goalsAgainst": 3,
+        "opponent": "",
+        "players": [
+            "p1",
+            "p2",
+            "p3"
+        ],
+        "mvp": null,
+        "playerStats": {
+            "p1": {
+                "goals": 0,
+                "assists": 2,
+                "saves": 2,
+                "shots": 2
+            },
+            "p2": {
+                "goals": 2,
+                "assists": 0,
+                "saves": 2,
+                "shots": 4
+            },
+            "p3": {
+                "goals": 0,
+                "assists": 1,
+                "saves": 3,
+                "shots": 0
             }
         }
     }
