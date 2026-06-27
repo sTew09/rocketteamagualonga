@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 16:16:14
+ * Última atualização: 27/06/2026, 16:21:13
  */
 
 const MATCHES_DATA = [
@@ -41,7 +41,7 @@ const MATCHES_DATA = [
         "id": "id_1782566167513_bhgqrcd6u",
         "date": "2026-06-27",
         "season": "partida",
-        "mode": "3v3",
+        "mode": "2v2",
         "result": "win",
         "goalsTeam": 5,
         "goalsAgainst": 1,
