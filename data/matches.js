@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 14:19:17
+ * Última atualização: 27/06/2026, 14:27:17
  */
 
 const MATCHES_DATA = [
@@ -121,6 +121,35 @@ const MATCHES_DATA = [
                 "assists": 1,
                 "saves": 1,
                 "shots": 4
+            }
+        }
+    },
+    {
+        "id": "id_1782566835565_vi99esluq",
+        "date": "2026-06-27",
+        "season": "PRATIDA",
+        "mode": "3v3",
+        "result": "win",
+        "goalsTeam": 3,
+        "goalsAgainst": 2,
+        "opponent": "",
+        "players": [
+            "p1",
+            "p2"
+        ],
+        "mvp": null,
+        "playerStats": {
+            "p1": {
+                "goals": 2,
+                "assists": 0,
+                "saves": 2,
+                "shots": 3
+            },
+            "p2": {
+                "goals": 1,
+                "assists": 2,
+                "saves": 2,
+                "shots": 3
             }
         }
     }
