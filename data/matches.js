@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 27/06/2026, 16:55:08
+ * Última atualização: 27/06/2026, 17:02:26
  */
 
 const MATCHES_DATA = [
@@ -489,6 +489,42 @@ const MATCHES_DATA = [
                 "assists": 0,
                 "saves": 1,
                 "shots": 3
+            }
+        }
+    },
+    {
+        "id": "id_1782576143931_kn4gjx076",
+        "date": "2026-06-27",
+        "season": "partida",
+        "mode": "3v3",
+        "result": "win",
+        "goalsTeam": 3,
+        "goalsAgainst": 0,
+        "opponent": "",
+        "players": [
+            "p1",
+            "p2",
+            "p3"
+        ],
+        "mvp": "p1",
+        "playerStats": {
+            "p1": {
+                "goals": 1,
+                "assists": 2,
+                "saves": 1,
+                "shots": 5
+            },
+            "p2": {
+                "goals": 2,
+                "assists": 1,
+                "saves": 0,
+                "shots": 2
+            },
+            "p3": {
+                "goals": 0,
+                "assists": 0,
+                "saves": 4,
+                "shots": 1
             }
         }
     }
