@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 28/06/2026, 14:35:13
+ * Última atualização: 28/06/2026, 14:42:30
  */
 
 const MATCHES_DATA = [
@@ -727,6 +727,42 @@ const MATCHES_DATA = [
                 "assists": 0,
                 "saves": 1,
                 "shots": 1
+            }
+        }
+    },
+    {
+        "id": "id_1782654148732_nhtbsiktv",
+        "date": "2026-06-28",
+        "season": "partida",
+        "mode": "3v3",
+        "result": "win",
+        "goalsTeam": 2,
+        "goalsAgainst": 0,
+        "opponent": "",
+        "players": [
+            "p1",
+            "p2",
+            "p3"
+        ],
+        "mvp": null,
+        "playerStats": {
+            "p1": {
+                "goals": 1,
+                "assists": 1,
+                "saves": 0,
+                "shots": 3
+            },
+            "p2": {
+                "goals": 1,
+                "assists": 1,
+                "saves": 0,
+                "shots": 2
+            },
+            "p3": {
+                "goals": 0,
+                "assists": 0,
+                "saves": 1,
+                "shots": 0
             }
         }
     }
