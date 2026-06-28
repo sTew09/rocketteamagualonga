@@ -4,7 +4,7 @@
  * ============================================
  * 
  * Este ficheiro é gerado automaticamente pelo painel admin.
- * Última atualização: 28/06/2026, 14:18:47
+ * Última atualização: 28/06/2026, 14:25:25
  */
 
 const PLAYERS_DATA = [
